@@ -1,12 +1,16 @@
 package controllers
 
 import (
+	"fmt"
+	"go-bakcend-todo-list/dto"
 	"go-bakcend-todo-list/models"
 	"go-bakcend-todo-list/services"
 	"go-bakcend-todo-list/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 type TodoController struct {
@@ -29,11 +33,29 @@ func (c *TodoController) GetAllTodos(ctx *gin.Context) {
 }
 
 func (c *TodoController) CreateTodo(ctx *gin.Context) {
-	var todo models.Todo
+	var req dto.CreateDtoTodo
 
-	if err := ctx.ShouldBind(&todo); err != nil {
-		utils.Error(ctx, 400, "Invalid request payload", err)
+	// debug: print engine saat request masuk
+	fmt.Printf("Request incoming — binding.Engine: %T\n", binding.Validator.Engine())
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		// debug: tunjukkan tipe error
+		fmt.Println("ShouldBindJSON error:", err)
+
+		// cek apakah error adalah ValidationErrors
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			fmt.Println("ValidationErrors detected:")
+			for _, e := range ve {
+				fmt.Printf("- Field: %s, Tag: %s, Param: %s\n", e.Field(), e.Tag(), e.Param())
+			}
+		}
+		utils.ValidationError(ctx, err)
 		return
+	}
+
+	todo := models.Todo{
+		Title:  req.Title,
+		Status: req.Status,
 	}
 
 	if err := c.service.Create(&todo); err != nil {

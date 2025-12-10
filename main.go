@@ -4,6 +4,7 @@ import (
 	"go-bakcend-todo-list/config"
 	"go-bakcend-todo-list/models"
 	"go-bakcend-todo-list/routes"
+	"go-bakcend-todo-list/utils"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,8 @@ import (
 )
 
 func main() {
+	utils.InitValidator()
+
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Failed to load .env")
 	}
@@ -22,7 +25,6 @@ func main() {
 	config.ConnectDB()
 	config.DB.AutoMigrate(&models.Todo{})
 
-	// jika success kasih info log
 	log.Println("Databases Connected")
 
 	r := gin.Default()
