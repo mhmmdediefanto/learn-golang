@@ -23,7 +23,10 @@ func main() {
 	}
 
 	config.ConnectDB()
-	config.DB.AutoMigrate(&models.Todo{})
+	config.DB.AutoMigrate(
+		&models.User{},
+		&models.Todo{},
+	)
 
 	log.Println("Databases Connected")
 
