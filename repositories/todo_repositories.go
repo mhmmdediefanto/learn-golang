@@ -28,12 +28,20 @@ func (r *TodoRepository) Delete(id uint) error {
 	return result.Error
 }
 
-func (r *TodoRepository) Update(id uint, todo *models.Todo) error {
+func (r *TodoRepository) Update(id uint, data *models.Todo) (*models.Todo, error) {
 	result := config.DB.Model(&models.Todo{}).
-		Where("id = ?", id).Updates(todo)
+		Where("id = ?", id).
+		Updates(data)
 
 	if result.RowsAffected == 0 {
-		return errors.New("todo tidak di temukan")
+		return nil, errors.New("todo tidak ditemukan")
 	}
-	return result.Error
+
+	// Ambil data terbaru
+	var updatedTodo models.Todo
+	if err := config.DB.First(&updatedTodo, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &updatedTodo, nil
 }

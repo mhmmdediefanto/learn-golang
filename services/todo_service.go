@@ -20,3 +20,7 @@ func (s *TodoService) Create(todo *models.Todo) error {
 func (s *TodoService) Delete(id uint) error {
 	return s.repo.Delete(id)
 }
+
+func (s *TodoService) Update(id uint, todo *models.Todo) (*models.Todo, error) {
+	return s.repo.Update(id, todo)
+}

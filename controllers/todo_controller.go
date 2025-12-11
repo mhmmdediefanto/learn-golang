@@ -9,8 +9,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 )
 
 type TodoController struct {
@@ -35,20 +33,7 @@ func (c *TodoController) GetAllTodos(ctx *gin.Context) {
 func (c *TodoController) CreateTodo(ctx *gin.Context) {
 	var req dto.CreateDtoTodo
 
-	// debug: print engine saat request masuk
-	fmt.Printf("Request incoming — binding.Engine: %T\n", binding.Validator.Engine())
-
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		// debug: tunjukkan tipe error
-		fmt.Println("ShouldBindJSON error:", err)
-
-		// cek apakah error adalah ValidationErrors
-		if ve, ok := err.(validator.ValidationErrors); ok {
-			fmt.Println("ValidationErrors detected:")
-			for _, e := range ve {
-				fmt.Printf("- Field: %s, Tag: %s, Param: %s\n", e.Field(), e.Tag(), e.Param())
-			}
-		}
 		utils.ValidationError(ctx, err)
 		return
 	}
@@ -83,4 +68,35 @@ func (c *TodoController) DeleteTodo(ctx *gin.Context) {
 
 	utils.Success(ctx, "Todo berhasil dihapus", nil)
 
+}
+
+func (c *TodoController) UpdateTodo(ctx *gin.Context) {
+
+	id, err := utils.ParamUint(ctx, "id")
+	if err != nil {
+		utils.Error(ctx, 400, "ID tidak valid", err)
+		return
+	}
+
+	fmt.Println("ID yang diupdate:", id)
+
+	// Bind JSON request ke DTO
+	var req dto.CreateDtoTodo
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		utils.ValidationError(ctx, err)
+		return
+	}
+
+	// Convert DTO ke model
+	todo := &models.Todo{
+		Title:  req.Title,
+		Status: req.Status,
+	}
+	// Panggil service update
+	updatedTodo, err := c.service.Update(id, todo)
+	if err != nil {
+		utils.Error(ctx, 500, "Gagal mengupdate todo", err)
+		return
+	}
+	utils.Success(ctx, "Todo berhasil diupdate", updatedTodo)
 }
