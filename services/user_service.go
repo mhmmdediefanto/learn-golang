@@ -4,6 +4,7 @@ import (
 	"errors"
 	"go-bakcend-todo-list/models"
 	"go-bakcend-todo-list/repositories"
+	"go-bakcend-todo-list/utils"
 
 	"gorm.io/gorm"
 )
@@ -28,5 +29,11 @@ func (s *UserService) Create(user *models.User) (*models.User, error) {
 		return nil, errors.New("email sudah terdaftar")
 	}
 
+	bytePassword, err := utils.HashPassword(user.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Password = bytePassword
 	return s.repo.Create(user)
 }
