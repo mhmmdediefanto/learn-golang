@@ -8,9 +8,12 @@ import (
 
 type TodoRepository struct{}
 
-func (r *TodoRepository) GetAll() ([]models.Todo, error) {
+func (r *TodoRepository) GetAll(userID uint) ([]models.Todo, error) {
 	var todos []models.Todo
-	result := config.DB.Find(&todos)
+	result := config.DB.
+		Where("user_id = ?", userID).
+		Preload("User").
+		Find(&todos)
 	return todos, result.Error
 }
 
@@ -18,8 +21,10 @@ func (r *TodoRepository) Create(todo *models.Todo) error {
 	return config.DB.Create(todo).Error
 }
 
-func (r *TodoRepository) Delete(id uint) error {
-	result := config.DB.Delete(&models.Todo{}, id)
+func (r *TodoRepository) Delete(id uint, userID uint) error {
+	result := config.DB.
+		Where("id = ? AND user_id = ?", id, userID).
+		Delete(&models.Todo{}, id)
 
 	if result.RowsAffected == 0 {
 		return errors.New("todo tidak di temukan")
@@ -28,9 +33,9 @@ func (r *TodoRepository) Delete(id uint) error {
 	return result.Error
 }
 
-func (r *TodoRepository) Update(id uint, data *models.Todo) (*models.Todo, error) {
+func (r *TodoRepository) Update(id uint, data *models.Todo, userID uint) (*models.Todo, error) {
 	result := config.DB.Model(&models.Todo{}).
-		Where("id = ?", id).
+		Where("id = ? AND user_id = ?", id, userID).
 		Updates(data)
 
 	if result.RowsAffected == 0 {

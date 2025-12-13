@@ -40,7 +40,7 @@ func SetupRoutes(r *gin.Engine) {
 		}
 
 		// Todo Routes
-		todos := api.Group("/todos")
+		todos := api.Group("/todos", middleware.AuthMiddleware())
 		{
 			todos.GET("/", todoHandler.GetAll)
 			todos.POST("/", todoHandler.Create)

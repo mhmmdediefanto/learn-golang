@@ -16,7 +16,9 @@ type TodoController struct {
 }
 
 func (c *TodoController) GetAll(ctx *gin.Context) {
-	todos, err := c.service.GetAll()
+	// ambil user id dari context (setelah middleware auth)
+	userID := utils.MustCurrentUser(ctx)
+	todos, err := c.service.GetAll(userID)
 	if err != nil {
 		utils.Error(ctx, 500, "Gagal Mengambil Todo List", err)
 		return
@@ -32,6 +34,7 @@ func (c *TodoController) GetAll(ctx *gin.Context) {
 
 func (c *TodoController) Create(ctx *gin.Context) {
 	var req dto.CreateDtoTodo
+	userID := utils.MustCurrentUser(ctx)
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		utils.ValidationError(ctx, err)
@@ -41,6 +44,7 @@ func (c *TodoController) Create(ctx *gin.Context) {
 	todo := models.Todo{
 		Title:  req.Title,
 		Status: req.Status,
+		UserID: userID,
 	}
 
 	if err := c.service.Create(&todo); err != nil {
@@ -53,6 +57,7 @@ func (c *TodoController) Create(ctx *gin.Context) {
 
 func (c *TodoController) Delete(ctx *gin.Context) {
 	idParams := ctx.Param("id")
+	userID := utils.MustCurrentUser(ctx)
 
 	id64, err := strconv.ParseUint(idParams, 10, 32)
 	if err != nil {
@@ -61,7 +66,7 @@ func (c *TodoController) Delete(ctx *gin.Context) {
 	}
 
 	id := uint(id64)
-	if err := c.service.Delete(id); err != nil {
+	if err := c.service.Delete(id, userID); err != nil {
 		utils.Error(ctx, 404, "Todo tidak ditemukan", err)
 		return
 	}
@@ -73,6 +78,7 @@ func (c *TodoController) Delete(ctx *gin.Context) {
 func (c *TodoController) Update(ctx *gin.Context) {
 
 	id, err := utils.ParamUint(ctx, "id")
+	userID := utils.MustCurrentUser(ctx)
 	if err != nil {
 		utils.Error(ctx, 400, "ID tidak valid", err)
 		return
@@ -93,7 +99,7 @@ func (c *TodoController) Update(ctx *gin.Context) {
 		Status: req.Status,
 	}
 	// Panggil service update
-	updatedTodo, err := c.service.Update(id, todo)
+	updatedTodo, err := c.service.Update(id, todo, userID)
 	if err != nil {
 		utils.Error(ctx, 500, "Gagal mengupdate todo", err)
 		return
