@@ -29,6 +29,7 @@ func SetupRoutes(r *gin.Engine) {
 			auth.POST("/signin", authHandler.SignIn)
 			auth.POST("/refresh", middleware.RefreshTokenMiddleware(userRepo), authHandler.RefreshToken)
 			// auth.POST("/register", userHandler.Create) // Register user baru biasanya public
+			auth.POST("/logout", middleware.AuthMiddleware(), authHandler.Logout)
 		}
 
 		// User Routes

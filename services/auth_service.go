@@ -54,3 +54,11 @@ func (s *AuthService) GetUserByID(userID uint) (*models.User, error) {
 	}
 	return user, nil
 }
+
+func (s *AuthService) Logout(userID uint) error {
+	// Hapus refresh token dari database
+	if err := s.userRepo.UpdateRefreshToken(userID, ""); err != nil {
+		return errors.New("gagal menghapus refresh token")
+	}
+	return nil
+}
