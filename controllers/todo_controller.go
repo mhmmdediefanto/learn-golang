@@ -15,7 +15,7 @@ type TodoController struct {
 	service services.TodoService
 }
 
-func (c *TodoController) GetAllTodos(ctx *gin.Context) {
+func (c *TodoController) GetAll(ctx *gin.Context) {
 	todos, err := c.service.GetAll()
 	if err != nil {
 		utils.Error(ctx, 500, "Gagal Mengambil Todo List", err)
@@ -30,7 +30,7 @@ func (c *TodoController) GetAllTodos(ctx *gin.Context) {
 	utils.Success(ctx, message, todos)
 }
 
-func (c *TodoController) CreateTodo(ctx *gin.Context) {
+func (c *TodoController) Create(ctx *gin.Context) {
 	var req dto.CreateDtoTodo
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -51,7 +51,7 @@ func (c *TodoController) CreateTodo(ctx *gin.Context) {
 	utils.Created(ctx, "Todo berhasil dibuat", todo)
 }
 
-func (c *TodoController) DeleteTodo(ctx *gin.Context) {
+func (c *TodoController) Delete(ctx *gin.Context) {
 	idParams := ctx.Param("id")
 
 	id64, err := strconv.ParseUint(idParams, 10, 32)
@@ -70,7 +70,7 @@ func (c *TodoController) DeleteTodo(ctx *gin.Context) {
 
 }
 
-func (c *TodoController) UpdateTodo(ctx *gin.Context) {
+func (c *TodoController) Update(ctx *gin.Context) {
 
 	id, err := utils.ParamUint(ctx, "id")
 	if err != nil {

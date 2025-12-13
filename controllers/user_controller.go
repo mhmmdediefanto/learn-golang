@@ -14,7 +14,7 @@ type UserController struct {
 	userService services.UserService
 }
 
-func (c *UserController) GetAllUsersController(ctx *gin.Context) {
+func (c *UserController) GetAll(ctx *gin.Context) {
 
 	users, err := c.userService.GetAll()
 	if err != nil {
@@ -25,7 +25,7 @@ func (c *UserController) GetAllUsersController(ctx *gin.Context) {
 	utils.Success(ctx, "Berhasil retrieved users", users)
 }
 
-func (c *UserController) CreateUserController(ctx *gin.Context) {
+func (c *UserController) Create(ctx *gin.Context) {
 	var userRequest dto.CreateUserDto
 
 	if err := ctx.ShouldBindJSON(&userRequest); err != nil {
