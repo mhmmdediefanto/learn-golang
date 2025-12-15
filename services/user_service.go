@@ -9,15 +9,24 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserService struct {
+type userService struct {
 	repo repositories.UserRepository
 }
 
-func (s *UserService) GetAll() ([]models.User, error) {
+type UserService interface {
+	GetAll() ([]models.User, error)
+	Create(user *models.User) (*models.User, error)
+}
+
+func NewUserService(repo repositories.UserRepository) UserService {
+	return &userService{repo: repo}
+}
+
+func (s *userService) GetAll() ([]models.User, error) {
 	return s.repo.GetAll()
 }
 
-func (s *UserService) Create(user *models.User) (*models.User, error) {
+func (s *userService) Create(user *models.User) (*models.User, error) {
 
 	existingEmail, err := s.repo.FindByEmail(user.Email)
 	// jika error bukan "not found", berarti error database

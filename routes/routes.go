@@ -3,51 +3,56 @@ package routes
 import (
 	"go-bakcend-todo-list/controllers"
 	"go-bakcend-todo-list/middleware"
-	"go-bakcend-todo-list/repositories"
+	"go-bakcend-todo-list/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine) {
-	todoHandler := controllers.TodoController{}
-	userHandler := controllers.UserController{}
-	authHandler := controllers.AuthController{}
-	userRepo := repositories.NewUserRepository()
-
+func SetupRoutes(
+	r *gin.Engine,
+	userController *controllers.UserController,
+	todoController *controllers.TodoController,
+	categoryController *controllers.CategoryController,
+	authController *controllers.AuthController,
+	authService services.AuthService,
+) {
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "API is running 🚀",
 		})
 	})
 
-	// 3. API Grouping & Versioning
 	api := r.Group("/api/v1")
 	{
 		auth := api.Group("/auth")
 		{
-			auth.GET("/me", middleware.AuthMiddleware(), authHandler.Me)
-			auth.POST("/signin", authHandler.SignIn)
-			auth.POST("/refresh", middleware.RefreshTokenMiddleware(userRepo), authHandler.RefreshToken)
-			// auth.POST("/register", userHandler.Create) // Register user baru biasanya public
-			auth.POST("/logout", middleware.AuthMiddleware(), authHandler.Logout)
+			auth.GET("/me", middleware.AuthMiddleware(), authController.Me)
+			auth.POST("/signin", authController.SignIn)
+			auth.POST(
+				"/refresh",
+				middleware.RefreshTokenMiddleware(authService),
+				authController.RefreshToken,
+			)
+			auth.POST("/logout", middleware.AuthMiddleware(), authController.Logout)
 		}
 
-		// User Routes
 		users := api.Group("/users")
 		{
-			users.GET("/", userHandler.GetAll)
-			users.POST("/", userHandler.Create)
+			users.GET("/", userController.GetAll)
+			users.POST("/", userController.Create)
 		}
 
-		// Todo Routes
 		todos := api.Group("/todos", middleware.AuthMiddleware())
 		{
-			todos.GET("/", todoHandler.GetAll)
-			todos.POST("/", todoHandler.Create)
-			// todos.GET("/:id", todoHandler.GetByID)
-			todos.PATCH("/:id", todoHandler.Update)
-			todos.DELETE("/:id", todoHandler.Delete)
+			todos.GET("/", todoController.GetAll)
+			todos.POST("/", todoController.Create)
+			todos.PATCH("/:id", todoController.Update)
+			todos.DELETE("/:id", todoController.Delete)
 		}
 
+		categories := api.Group("/categories")
+		{
+			categories.GET("/", categoryController.GetAll)
+		}
 	}
 }

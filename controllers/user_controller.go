@@ -11,12 +11,16 @@ import (
 )
 
 type UserController struct {
-	userService services.UserService
+	service services.UserService
+}
+
+func NewUserController(service services.UserService) *UserController {
+	return &UserController{service: service}
 }
 
 func (c *UserController) GetAll(ctx *gin.Context) {
 
-	users, err := c.userService.GetAll()
+	users, err := c.service.GetAll()
 	if err != nil {
 		utils.Error(ctx, http.StatusInternalServerError, "Gagal retrieved users", err)
 		return
@@ -39,7 +43,7 @@ func (c *UserController) Create(ctx *gin.Context) {
 		Password: userRequest.Password,
 	}
 
-	createdUser, err := c.userService.Create(&user)
+	createdUser, err := c.service.Create(&user)
 	if err != nil {
 		utils.Error(ctx, http.StatusInternalServerError, "Gagal membuat user", err)
 		return

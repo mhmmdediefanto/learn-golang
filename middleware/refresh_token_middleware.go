@@ -1,14 +1,14 @@
 package middleware
 
 import (
-	"go-bakcend-todo-list/repositories"
+	"go-bakcend-todo-list/services"
 	"go-bakcend-todo-list/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RefreshTokenMiddleware(userRepo *repositories.UserRepository) gin.HandlerFunc {
+func RefreshTokenMiddleware(authService services.AuthService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		refreshToken, err := ctx.Cookie("refresh_token")
 		if err != nil {
@@ -24,9 +24,8 @@ func RefreshTokenMiddleware(userRepo *repositories.UserRepository) gin.HandlerFu
 			return
 		}
 
-		dbToken, err := userRepo.GetRefreshTokenByUserID(claims.UserID)
-		if err != nil || dbToken != refreshToken {
-			utils.Error(ctx, http.StatusUnauthorized, "Refresh Token tidak cocok / sudah di-logout", nil)
+		if err := authService.ValidateRefreshToken(claims.UserID, refreshToken); err != nil {
+			utils.Error(ctx, http.StatusUnauthorized, err.Error(), nil)
 			ctx.Abort()
 			return
 		}

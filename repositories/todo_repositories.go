@@ -2,27 +2,40 @@ package repositories
 
 import (
 	"errors"
-	"go-bakcend-todo-list/config"
 	"go-bakcend-todo-list/models"
+
+	"gorm.io/gorm"
 )
 
-type TodoRepository struct{}
+type TodoRepository interface {
+	GetAll(userID uint) ([]models.Todo, error)
+	Create(todo *models.Todo) error
+	Delete(id uint, userID uint) error
+	Update(id uint, data *models.Todo, userID uint) (*models.Todo, error)
+}
+type todoRepository struct {
+	db *gorm.DB
+}
 
-func (r *TodoRepository) GetAll(userID uint) ([]models.Todo, error) {
+func NewTodoRepository(db *gorm.DB) TodoRepository {
+	return &todoRepository{db: db}
+}
+
+func (r *todoRepository) GetAll(userID uint) ([]models.Todo, error) {
 	var todos []models.Todo
-	result := config.DB.
+	result := r.db.
 		Where("user_id = ?", userID).
 		Preload("User").
 		Find(&todos)
 	return todos, result.Error
 }
 
-func (r *TodoRepository) Create(todo *models.Todo) error {
-	return config.DB.Create(todo).Error
+func (r *todoRepository) Create(todo *models.Todo) error {
+	return r.db.Create(todo).Error
 }
 
-func (r *TodoRepository) Delete(id uint, userID uint) error {
-	result := config.DB.
+func (r *todoRepository) Delete(id uint, userID uint) error {
+	result := r.db.
 		Where("id = ? AND user_id = ?", id, userID).
 		Delete(&models.Todo{}, id)
 
@@ -33,8 +46,8 @@ func (r *TodoRepository) Delete(id uint, userID uint) error {
 	return result.Error
 }
 
-func (r *TodoRepository) Update(id uint, data *models.Todo, userID uint) (*models.Todo, error) {
-	result := config.DB.Model(&models.Todo{}).
+func (r *todoRepository) Update(id uint, data *models.Todo, userID uint) (*models.Todo, error) {
+	result := r.db.Model(&models.Todo{}).
 		Where("id = ? AND user_id = ?", id, userID).
 		Updates(data)
 
@@ -44,7 +57,7 @@ func (r *TodoRepository) Update(id uint, data *models.Todo, userID uint) (*model
 
 	// Ambil data terbaru
 	var updatedTodo models.Todo
-	if err := config.DB.First(&updatedTodo, id).Error; err != nil {
+	if err := r.db.First(&updatedTodo, id).Error; err != nil {
 		return nil, err
 	}
 

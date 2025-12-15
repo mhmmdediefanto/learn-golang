@@ -9,7 +9,11 @@ import (
 )
 
 type AuthController struct {
-	authService services.AuthService
+	service services.AuthService
+}
+
+func NewAuthController(service services.AuthService) *AuthController {
+	return &AuthController{service: service}
 }
 
 func (c *AuthController) SignIn(ctx *gin.Context) {
@@ -19,7 +23,7 @@ func (c *AuthController) SignIn(ctx *gin.Context) {
 		return
 	}
 
-	users, accessToken, refreshToken, err := c.authService.SignIn(req.Email, req.Password)
+	users, accessToken, refreshToken, err := c.service.SignIn(req.Email, req.Password)
 	if err != nil {
 		utils.Error(ctx, 401, "Gagal sign in", err)
 		return
@@ -55,7 +59,7 @@ func (c *AuthController) Me(ctx *gin.Context) {
 		utils.Error(ctx, 401, "User ID not found in context", nil)
 		return
 	}
-	user, err := c.authService.GetUserByID(userID.(uint))
+	user, err := c.service.GetUserByID(userID.(uint))
 	if err != nil {
 		utils.Error(ctx, 404, "User not found", err)
 		return
@@ -75,7 +79,7 @@ func (c *AuthController) Logout(ctx *gin.Context) {
 		return
 	}
 	// panggil service logout
-	err := c.authService.Logout(userID.(uint))
+	err := c.service.Logout(userID.(uint))
 	if err != nil {
 		utils.Error(ctx, 500, "Gagal logout", err)
 		return

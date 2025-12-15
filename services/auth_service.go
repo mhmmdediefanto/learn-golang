@@ -7,15 +7,22 @@ import (
 	"go-bakcend-todo-list/utils"
 )
 
-type AuthService struct {
+type authService struct {
 	userRepo repositories.UserRepository
 }
 
-func NewAuthService(userRepo repositories.UserRepository) *AuthService {
-	return &AuthService{userRepo: userRepo}
+type AuthService interface {
+	SignIn(email, password string) (*models.User, string, string, error)
+	GetUserByID(userID uint) (*models.User, error)
+	Logout(userID uint) error
+	ValidateRefreshToken(userID uint, token string) error
 }
 
-func (s *AuthService) SignIn(email, password string) (*models.User, string, string, error) {
+func NewAuthService(userRepo repositories.UserRepository) AuthService {
+	return &authService{userRepo: userRepo}
+}
+
+func (s *authService) SignIn(email, password string) (*models.User, string, string, error) {
 	// Implementasi logika sign-in di sini
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
@@ -47,7 +54,7 @@ func (s *AuthService) SignIn(email, password string) (*models.User, string, stri
 	return user, accessToken, refreshToken, nil
 }
 
-func (s *AuthService) GetUserByID(userID uint) (*models.User, error) {
+func (s *authService) GetUserByID(userID uint) (*models.User, error) {
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return nil, err
@@ -55,10 +62,18 @@ func (s *AuthService) GetUserByID(userID uint) (*models.User, error) {
 	return user, nil
 }
 
-func (s *AuthService) Logout(userID uint) error {
+func (s *authService) Logout(userID uint) error {
 	// Hapus refresh token dari database
 	if err := s.userRepo.UpdateRefreshToken(userID, ""); err != nil {
 		return errors.New("gagal menghapus refresh token")
+	}
+	return nil
+}
+
+func (s *authService) ValidateRefreshToken(userID uint, token string) error {
+	dbToken, err := s.userRepo.GetRefreshTokenByUserID(userID)
+	if err != nil || dbToken != token {
+		return errors.New("refresh token tidak valid / sudah logout")
 	}
 	return nil
 }

@@ -15,6 +15,10 @@ type TodoController struct {
 	service services.TodoService
 }
 
+func NewTodoController(service services.TodoService) *TodoController {
+	return &TodoController{service: service}
+}
+
 func (c *TodoController) GetAll(ctx *gin.Context) {
 	// ambil user id dari context (setelah middleware auth)
 	userID := utils.MustCurrentUser(ctx)
