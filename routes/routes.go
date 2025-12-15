@@ -53,6 +53,9 @@ func SetupRoutes(
 		categories := api.Group("/categories")
 		{
 			categories.GET("/", categoryController.GetAll)
+			categories.POST("/", categoryController.Create)
+			categories.PUT("/:id", categoryController.Update)
+			categories.DELETE("/:id", categoryController.Delete)
 		}
 	}
 }
