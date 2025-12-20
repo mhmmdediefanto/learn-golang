@@ -15,6 +15,7 @@ func SetupRoutes(
 	categoryController *controllers.CategoryController,
 	authController *controllers.AuthController,
 	authService services.AuthService,
+	articleController *controllers.ArticleController,
 ) {
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -56,6 +57,14 @@ func SetupRoutes(
 			categories.POST("/", categoryController.Create)
 			categories.PUT("/:id", categoryController.Update)
 			categories.DELETE("/:id", categoryController.Delete)
+		}
+
+		article := api.Group("/articles", middleware.AuthMiddleware())
+		{
+			article.GET("/", articleController.GetAll)
+			article.POST("/", articleController.Create)
+			article.DELETE("/:id", articleController.Delete)
+			article.PUT("/:id", articleController.Update)
 		}
 	}
 }

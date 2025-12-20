@@ -41,18 +41,21 @@ func main() {
 	userRepo := repositories.NewUserRepository(config.DB)
 	todoRepo := repositories.NewTodoRepository(config.DB)
 	categoryRepo := repositories.NewCategoryRepository(config.DB)
+	articleRepo := repositories.NewArticleRepository(config.DB)
 
 	// ===== SERVICE =====
 	userService := services.NewUserService(userRepo)
 	todoService := services.NewTodoService(todoRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	authService := services.NewAuthService(userRepo)
+	articleService := services.NewArticleService(articleRepo)
 
 	// ===== CONTROLLER =====
 	userController := controllers.NewUserController(userService)
 	todoController := controllers.NewTodoController(todoService)
 	categoryController := controllers.NewCategoryController(categoryService)
 	authController := controllers.NewAuthController(authService)
+	articleController := controllers.NewArticleController(articleService)
 
 	// ===== ROUTES =====
 	routes.SetupRoutes(
@@ -62,6 +65,7 @@ func main() {
 		categoryController,
 		authController,
 		authService,
+		articleController,
 	)
 
 	r.Run(":8080")

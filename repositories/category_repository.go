@@ -52,7 +52,7 @@ func (r *categoryRepository) Delete(id uint) error {
 func (r *categoryRepository) Update(category *models.Category, id uint) (*models.Category, error) {
 	result := r.db.Model(&models.Category{}).
 		Where("id = ?", id).
-		Updates(category) // GORM otomatis update field non-zero
+		Updates(category) // GORM otomatis update field non-zero,
 
 	if result.Error != nil {
 		return nil, result.Error

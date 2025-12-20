@@ -9,6 +9,6 @@ type Article struct {
 	Title   string
 	Content string
 	Slug    string `gorm:"uniqueIndex"`
-	Status  string `gorm:"type:enum('draft','published','archived');default:'draft'"`
+	Status  string `gorm:"size:20;default:'draft'"`
 	User    *User  `gorm:"foreignKey:UserID"`
 }
