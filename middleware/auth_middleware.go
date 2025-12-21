@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"go-bakcend-todo-list/enums"
 	"go-bakcend-todo-list/utils"
 	"net/http"
 	"strings"
@@ -34,7 +35,10 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Simpan user ID di context untuk digunakan di handler berikutnya
-		ctx.Set("userID", claims.UserID)
+		ctx.Set("auth", utils.AuthContext{
+			UserID: claims.UserID,
+			Role:   enums.UserRole(claims.Role),
+		})
 		ctx.Next()
 
 	}

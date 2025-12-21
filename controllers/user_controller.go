@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"go-bakcend-todo-list/dto"
+	"go-bakcend-todo-list/enums"
 	"go-bakcend-todo-list/models"
 	"go-bakcend-todo-list/services"
 	"go-bakcend-todo-list/utils"
@@ -37,10 +38,15 @@ func (c *UserController) Create(ctx *gin.Context) {
 		return
 	}
 
+	if userRequest.Role == "" {
+		userRequest.Role = enums.RoleUser
+	}
+
 	user := models.User{
 		Name:     userRequest.Name,
 		Email:    userRequest.Email,
 		Password: userRequest.Password,
+		Role:     userRequest.Role,
 	}
 
 	createdUser, err := c.service.Create(&user)

@@ -37,13 +37,10 @@ func (c *AuthController) SignIn(ctx *gin.Context) {
 }
 
 func (c *AuthController) RefreshToken(ctx *gin.Context) {
-	userID, exists := ctx.Get("userID")
-	if !exists {
-		utils.Error(ctx, 401, "User ID not found in context", nil)
-		return
-	}
+	userID := utils.MustCurrentUser(ctx)
+	roleUser := utils.MustRoleUser(ctx)
 
-	newAccessToken, err := utils.GenerateAccessToken(userID.(uint))
+	newAccessToken, err := utils.GenerateAccessToken(userID, roleUser)
 	if err != nil {
 		utils.Error(ctx, 500, "Failed to generate new access token", err)
 		return
@@ -54,12 +51,8 @@ func (c *AuthController) RefreshToken(ctx *gin.Context) {
 }
 
 func (c *AuthController) Me(ctx *gin.Context) {
-	userID, exists := ctx.Get("userID")
-	if !exists {
-		utils.Error(ctx, 401, "User ID not found in context", nil)
-		return
-	}
-	user, err := c.service.GetUserByID(userID.(uint))
+	userID := utils.MustCurrentUser(ctx)
+	user, err := c.service.GetUserByID(userID)
 	if err != nil {
 		utils.Error(ctx, 404, "User not found", err)
 		return
@@ -72,14 +65,9 @@ func (c *AuthController) Me(ctx *gin.Context) {
 
 func (c *AuthController) Logout(ctx *gin.Context) {
 
-	// cek userID dari context
-	userID, exists := ctx.Get("userID")
-	if !exists {
-		utils.Error(ctx, 401, "User ID not found in context", nil)
-		return
-	}
+	userID := utils.MustCurrentUser(ctx)
 	// panggil service logout
-	err := c.service.Logout(userID.(uint))
+	err := c.service.Logout(userID)
 	if err != nil {
 		utils.Error(ctx, 500, "Gagal logout", err)
 		return

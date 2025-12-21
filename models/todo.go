@@ -7,6 +7,6 @@ type Todo struct {
 	Title  string `json:"title"`
 	Status bool   `json:"status"`
 
-	UserID uint  `json:"user_id"`
-	User   *User `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	UserID uint `json:"user_id"`
+	User   User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

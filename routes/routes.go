@@ -2,6 +2,7 @@ package routes
 
 import (
 	"go-bakcend-todo-list/controllers"
+	"go-bakcend-todo-list/enums"
 	"go-bakcend-todo-list/middleware"
 	"go-bakcend-todo-list/services"
 
@@ -51,7 +52,7 @@ func SetupRoutes(
 			todos.DELETE("/:id", todoController.Delete)
 		}
 
-		categories := api.Group("/categories")
+		categories := api.Group("/categories", middleware.AuthMiddleware(), middleware.RequireRole(enums.RoleAdmin))
 		{
 			categories.GET("/", categoryController.GetAll)
 			categories.POST("/", categoryController.Create)

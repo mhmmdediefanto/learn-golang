@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"go-bakcend-todo-list/enums"
 	"os"
 	"time"
 
@@ -12,7 +13,8 @@ var refreshSecret = []byte(os.Getenv("JWT_REFRESH_SECRET"))
 
 // claim access user
 type AccessClaims struct {
-	UserID uint `json:"user_id"`
+	UserID uint           `json:"user_id"`
+	Role   enums.UserRole `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -22,9 +24,10 @@ type RefreshClaim struct {
 }
 
 // generate token access
-func GenerateAccessToken(userID uint) (string, error) {
+func GenerateAccessToken(userID uint, role enums.UserRole) (string, error) {
 	claims := AccessClaims{
 		UserID: userID,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 		},
@@ -36,7 +39,7 @@ func GenerateAccessToken(userID uint) (string, error) {
 
 // generate refresh token (7 hari)
 func GenerateRefreshToken(userID uint) (string, error) {
-	claims := AccessClaims{
+	claims := RefreshClaim{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),

@@ -34,8 +34,8 @@ func (s *authService) SignIn(email, password string) (*models.User, string, stri
 		return nil, "", "", errors.New("password salah")
 	}
 
-	//buat generte access token
-	accessToken, err := utils.GenerateAccessToken(user.ID)
+	//buat generte access tokenstring
+	accessToken, err := utils.GenerateAccessToken(user.ID, user.Role)
 	if err != nil {
 		return nil, "", "", errors.New("gagal membuat access token")
 	}
